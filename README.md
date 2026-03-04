@@ -17,6 +17,7 @@
 git clone <repo-url>
 cd <repo-name>
 make setup
+```
 
 ---
 ## 📝 Hướng dẫn cài đặt thủ công (Manual Setup)

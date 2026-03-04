@@ -1,54 +1,12 @@
-# 🖥️ HƯỚNG DẪN CÀI ĐẶT MÔI TRƯỜNG SDN
-## Windows 11 + Ubuntu 20.04 + Mininet + Ryu + Open vSwitch + Wireshark
+# 🖥 Ubuntu 20.04 SDN Environment Setup  
+### Mininet + Open vSwitch + Ryu (Python Virtual Environment)
 
 ---
 
-# 📌 MỤC LỤC
+# 📌 1. Install Ubuntu 20.04
 
-1. [Chuẩn bị trên Windows 11](#-phần-0--chuẩn-bị-trên-windows-11)
-2. [Tạo VM Ubuntu 20.04](#-phần-1--tạo-vm-ubuntu-2004)
-3. [Update hệ thống](#-phần-2--update-hệ-thống)
-4. [Cài công cụ cơ bản](#-phần-3--cài-công-cụ-cơ-bản)
-5. [Cài Python + pip + wheel](#-phần-4--cài-python--pip--wheel-quan-trọng)
-6. [Cài Mininet](#-phần-5--cài-mininet)
-7. [Cài Open vSwitch](#-phần-6--cài-open-vswitch)
-8. [Cài Ryu Controller](#-phần-7--cài-ryu-controller)
-9. [Cài Wireshark](#-phần-8--cài-wireshark)
-10. [Test SDN hoàn chỉnh](#-phần-9--test-sdn-hoàn-chỉnh)
-11. [Test Wireshark](#-phần-10--test-wireshark-optional)
-12. [Cleanup](#-phần-11--cleanup)
-
----
-
-# ✅ PHẦN 0 — Chuẩn bị trên Windows 11
-
-- [ ] Cài VMware Workstation 17  
-- [ ] Download Ubuntu 20.04 LTS ISO  
-
----
-
-# ✅ PHẦN 1 — Tạo VM Ubuntu 20.04
-
-## 🔧 Cấu hình máy ảo
-
-| Thành phần | Giá trị khuyến nghị |
-|------------|--------------------|
-| Type | Linux |
-| Version | Ubuntu 64-bit |
-| RAM | ≥ 4GB (khuyên 6–8GB nếu có) |
-| CPU | ≥ 2 cores |
-| Disk | ≥ 30GB |
-| Network | NAT |
-
-## 📦 Cài Ubuntu
-
-- Chọn **Normal installation**
-- Tick **Install third-party software**
-- Tạo user và password
-
----
-
-# ✅ PHẦN 2 — Update hệ thống
+- Cài Ubuntu 20.04 trên VMware
+- Sau khi login, update hệ thống:
 
 ```bash
 sudo apt update
@@ -57,60 +15,45 @@ sudo apt upgrade -y
 
 ---
 
-# ✅ PHẦN 3 — Cài công cụ cơ bản
+# 🐍 2. Check Python Version
+
+Ubuntu 20.04 mặc định dùng **Python 3.8**.
+
+Kiểm tra:
 
 ```bash
-sudo apt install -y git curl build-essential net-tools
+python3 --version
+```
+
+Yêu cầu:
+
+```
+Python 3.8.x
 ```
 
 ---
 
-# ✅ PHẦN 4 — Cài Python + pip + wheel (QUAN TRỌNG)
+# 🔀 3. Install Mininet + Open vSwitch
+
+## Cài đặt:
 
 ```bash
-sudo apt install -y python3 python3-pip python3-dev
+sudo apt install -y mininet openvswitch-switch
 ```
 
-### 🔥 Cài wheel
-
-```bash
-pip3 install --upgrade pip
-pip3 install wheel
-```
-
-> `wheel` giúp build package nhanh và tránh lỗi khi cài Ryu.
-
----
-
-# ✅ PHẦN 5 — Cài Mininet
-
-```bash
-sudo apt install -y mininet
-```
-
-## 🧪 Test
+## Kiểm tra Mininet:
 
 ```bash
 sudo mn --test pingall
 ```
 
-Nếu thấy:
+Kết quả mong đợi:
 
 ```
 Results: 0% dropped
 ```
 
-→ ✅ Mininet hoạt động bình thường
-
----
-
-# ✅ PHẦN 6 — Cài Open vSwitch
-
-```bash
-sudo apt install -y openvswitch-switch
-```
-
-Kiểm tra:
+## Kiểm tra Open vSwitch:
 
 ```bash
 sudo ovs-vsctl show
@@ -118,67 +61,107 @@ sudo ovs-vsctl show
 
 ---
 
-# ✅ PHẦN 7 — Cài Ryu Controller
+# 🧪 4. Create Python Virtual Environment
+
+## Cài công cụ venv:
 
 ```bash
-pip3 install ryu
+sudo apt install -y python3-venv
 ```
 
-Kiểm tra version:
+## Tạo môi trường ảo:
 
 ```bash
-ryu-manager --version
+python3 -m venv ryu-venv
+```
+
+## Kích hoạt:
+
+```bash
+source ryu-venv/bin/activate
 ```
 
 ---
 
-# ✅ PHẦN 8 — Cài Wireshark
+# 📦 5. Install pip, wheel, and Ryu
+
+## Upgrade pip:
 
 ```bash
-sudo apt install -y wireshark
+pip install --upgrade pip
 ```
 
-Khi được hỏi:
-
-```
-Allow non-superusers to capture packets?
-```
-
-👉 Chọn **Yes**
-
-Thêm user vào group:
+## Install wheel (QUAN TRỌNG):
 
 ```bash
-sudo usermod -aG wireshark $USER
+pip install wheel
 ```
 
-Sau đó:
+## Cài Ryu:
 
 ```bash
-newgrp wireshark
+pip install ryu
 ```
-
-Hoặc logout/login lại.
 
 ---
 
-# ✅ PHẦN 9 — Test SDN hoàn chỉnh
+# ⚙ 6. Fix Eventlet Compatibility
 
-## 🟢 Terminal 1 — Chạy Ryu
+Ryu trên Ubuntu 20.04 đôi khi lỗi với phiên bản eventlet mới.
+
+## Hạ xuống version ổn định:
+
+```bash
+pip uninstall eventlet -y
+pip install eventlet==0.30.2
+```
+
+## Kiểm tra:
+
+```bash
+pip show eventlet
+```
+
+Phải thấy:
+
+```
+Version: 0.30.2
+```
+
+---
+
+# 🧪 Verification – Test All Components
+
+---
+
+## 1️⃣ Test Ryu
+
+Trong venv:
 
 ```bash
 ryu-manager ryu.app.simple_switch_13
 ```
 
-Nếu thành công sẽ thấy:
+Nếu chạy bình thường → ✅ OK  
+
+Dừng bằng:
 
 ```
-Switch connected
+Ctrl + C
 ```
 
 ---
 
-## 🟢 Terminal 2 — Chạy Mininet
+## 2️⃣ Test Mininet with Ryu
+
+### 🟢 Terminal 1 (Ryu):
+
+```bash
+source ryu-venv/bin/activate
+ryu-manager ryu.app.simple_switch_13
+```
+
+### 🟢 Terminal 2 (Mininet):
 
 ```bash
 sudo mn --topo single,2 --controller=remote --switch ovsk,protocols=OpenFlow13
@@ -186,7 +169,7 @@ sudo mn --topo single,2 --controller=remote --switch ovsk,protocols=OpenFlow13
 
 ---
 
-## 🟢 Test ping
+## 3️⃣ Test Ping
 
 Trong Mininet:
 
@@ -200,31 +183,11 @@ Kết quả mong đợi:
 0% packet loss
 ```
 
----
-
-# ✅ PHẦN 10 — Test Wireshark (Optional)
-
-Chạy:
-
-```bash
-wireshark
-```
-
-- Interface: `lo`
-- Filter:
-
-```
-openflow_v4
-```
-
-Ping lại → sẽ thấy:
-
-- PACKET_IN
-- FLOW_MOD
+Nếu thành công → ✅ môi trường SDN hoạt động chính xác.
 
 ---
 
-# ✅ PHẦN 11 — Cleanup
+## 4️⃣ Cleanup
 
 Thoát Mininet:
 
@@ -240,20 +203,26 @@ sudo mn -c
 
 ---
 
-# 🎯 KẾT QUẢ MONG ĐỢI
+# 📊 Environment Summary
 
-✔ Ryu Controller hoạt động  
-✔ Switch kết nối thành công  
-✔ Ping giữa host hoạt động  
-✔ Wireshark bắt được OpenFlow  
-✔ Không có packet loss  
+| Component | Version |
+|------------|----------|
+| OS | Ubuntu 20.04 |
+| Python | 3.8 |
+| Mininet | Installed |
+| Open vSwitch | Installed |
+| Ryu | Installed (venv) |
+| eventlet | 0.30.2 |
 
 ---
 
-# 🏁 HOÀN THÀNH
+# 🏁 Result
 
 Môi trường SDN đã sẵn sàng để:
+
 - Làm lab OpenFlow
-- Phát triển controller
+- Phát triển Ryu controller
 - Mô phỏng topology nâng cao
 - Thực hiện đồ án SDN
+
+---
